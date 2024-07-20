@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jube>
+
+    <!-- benchmark definition -->
+    <benchmark name="HPL_Benchmark" outpath="benchmarks_$SYSTEMNAME">
+
+        <parameterset name="environment">
+            <parameter name="systemname" mode="shell">cat /etc/FZJ/systemname | tr -d "\n"</parameter>
+
+            <parameter name="gccver" separator="!" mode="python">{
+                "imkl/2019.3.199": "9.3.0",
+                "imkl/2019.5.281": "9.3.0",
+                "imkl/2020.2.254": "9.3.0",
+                "imkl/2020.4.304": "9.3.0",
+                "imkl/2021.2.0":   "10.3.0",
+                "imkl/2021.4.0":   "11.2.0",
+                "imkl/2022.1.0":   "11.3.0",
+                "BLIS/2.2-amd":    "9.3.0",
+                "BLIS/0.8.1":      "11.2.0",
+                "BLIS/3.1-amd":    "11.2.0",
+                "BLIS/0.9.0":      "11.3.0",
+              }["${numlib}"]</parameter>
+            <parameter name="Stage" separator="!" mode="python">{
+                "imkl/2019.3.199": "2019a",
+                "imkl/2019.5.281": "2019a",
+                "imkl/2020.2.254": "Devel-2020",
+                "imkl/2020.4.304": "2020",
+                "imkl/2021.2.0":   "2020",
+                "imkl/2021.4.0":   "2022",
+                "imkl/2022.1.0":   "2023",
+                "BLIS/2.2-amd":    "Devel-2020",
+                "BLIS/0.8.1":      "2022",
+                "BLIS/3.1-amd":    "2022",
+                "BLIS/0.9.0":      "2023",
+              }["${numlib}"]</parameter>
+            <parameter name="numlib" separator="," mode="python" tag="!gpu">
+              {
+                "juwels":        "BLIS/0.8.1",
+                "juwelstest":    "BLIS/0.8.1",
+                "juwelsbooster": "BLIS/0.8.1",
+                "jurecadc":      "BLIS/3.1-amd",
+                "jurecatest":    "BLIS/3.1-amd",
+                "jusuf":         "BLIS/3.1-amd",
+              }["${systemname}"]
+            </parameter>
+            <parameter name="numlib" separator="," mode="python" tag="gpu">
+              {
+                "juwels":        "imkl/2021.4.0",
+                "juwelstest":    "imkl/2021.4.0",
+                "juwelsbooster": "imkl/2021.4.0",
+                "jurecadc":      "imkl/2022.1.0",
+                "jurecatest":    "imkl/2021.4.0",
+                "jusuf":         "imkl/2021.4.0",
+              }["${systemname}"]
+            </parameter>
+            <parameter name="mpi" separator="," mode="python" tag="!gpu">
+              {
+                "juwels":        "ParaStationMPI",
+                "juwelstest":    "ParaStationMPI",
+                "juwelsbooster": "ParaStationMPI",
+                "jurecadc":      "ParaStationMPI",
+                "jurecatest":    "ParaStationMPI",
+                "jusuf":         "ParaStationMPI",
+              }["${systemname}"]
+            </parameter>
+            <parameter name="mpi" separator="," mode="python" tag="gpu">
+              {
+                "juwels":        "OpenMPI",
+                "juwelstest":    "OpenMPI",
+                "juwelsbooster": "OpenMPI",
+                "jurecadc":      "OpenMPI",
+                "jurecatest":    "OpenMPI",
+                "jusuf":         "OpenMPI",
+              }["${systemname}"]
+            </parameter>
+
+            <parameter name="ucx" separator="," mode="python" tag="!gpu">
+              {
+                "juwels":        "UCX UCX-settings/RC",
+                "juwelstest":    "UCX UCX-settings/RC",
+                "juwelsbooster": "UCX UCX-settings/RC",
+                "jurecadc":      "UCX UCX-settings/RC",
+                "jurecatest":    "UCX UCX-settings/RC",
+                "jusuf":         "UCX UCX-settings/RC",
+              }["${systemname}"]
+            </parameter>
+            <parameter name="ucx" separator="," mode="python" tag="gpu">
+              {
+                "juwels":        "UCX UCX-settings/RC-CUDA",
+                "juwelstest":    "UCX UCX-settings/RC-CUDA",
+                "juwelsbooster": "UCX UCX-settings/RC-CUDA",
+                "jurecadc":      "UCX UCX-settings/RC-CUDA",
+                "jurecatest":    "UCX UCX-settings/RC-CUDA",
+                "jusuf":         "UCX UCX-settings/RC-CUDA",
+              }["${systemname}"]
+            </parameter>
+
+            <parameter name="CUDA" separator="," tag="!gpu"></parameter>
+            <parameter name="CUDA" separator="," mode="python" tag="gpu">
+              {
+                "2022":          "CUDA/11.5",
+                "2023":          "CUDA/11.7",
+              }["${Stage}"]
+            </parameter>
+            <parameter name="numlib_compile" separator="!" mode="python">"${numlib}".split('/')[0]</parameter>
+            <parameter name="load_modules" separator="!" mode="python">  {
+                "juwels":        "module purge; module use $OTHERSTAGES; module load Stages/${Stage}; module load GCC/${gccver} ${CUDA} ${ucx} ${mpi} ${numlib}; ml",
+                "juwelstest":    "module purge; module use $OTHERSTAGES; module load Stages/${Stage}; module load GCC/${gccver} ${CUDA} ${ucx} ${mpi} ${numlib}; ml",
+                "juwelsbooster": "module purge; module use $OTHERSTAGES; module load Stages/${Stage}; module load GCC/${gccver} ${CUDA} ${ucx} ${mpi} ${numlib}; ml",
+                "jurecadc":      "module purge; module use $OTHERSTAGES; module load Stages/${Stage}; module load GCC/${gccver} ${CUDA} ${ucx} ${mpi} ${numlib}; ml",
+                "jurecatest":    "module purge; module use $OTHERSTAGES; module load Stages/${Stage}; module load GCC/${gccver} ${CUDA} ${ucx} ${mpi} ${numlib}; ml",
+                "jusuf":         "module purge; module use $OTHERSTAGES; module load Stages/${Stage}; module load GCC/${gccver} ${CUDA} ${ucx} ${mpi} ${numlib}; ml",
+              }["${systemname}"]
+            </parameter>
+        </parameterset>
+
+        <!-- source data -->
+        <fileset name="source">
+            <copy>../../src/hpl-2.3.tar.gz</copy>
+            <copy>Make.in</copy>
+            <prepare>tar -xzf hpl-2.3.tar.gz</prepare>
+            <prepare>mv hpl-2.3/* .</prepare>
+            <prepare>rmdir hpl-2.3</prepare>
+        </fileset>
+
+        <!-- source data -->
+        <fileset name="binary">
+            <link>../../bin/xhpl</link>
+        </fileset>
+        
+        <parameterset name="compileset">
+            <!-- Compiler information -->
+            <parameter name="make">gmake</parameter>
+            <parameter name="cc">gcc</parameter>
+            <parameter name="cflags"></parameter>
+            <parameter name="mpi_cc">mpicc</parameter>
+            <parameter name="mpi_cxx">mpicxx</parameter>
+            <parameter name="mpi_f90">mpif90</parameter>
+            <parameter name="mpi_f77">mpif77</parameter>
+        </parameterset>
+
+        <parameterset name="hplSystemParameter" init_with="hpl-specs.xml" tag="binary">
+            <parameter name="target">xhpl</parameter>
+            <parameter name="hpl_exec">../../bin/${hpl_arch}/$target</parameter>
+        </parameterset>
+
+        <parameterset name="hplSystemParameter" init_with="hpl-specs.xml" tag="!binary">
+            <parameter name="hpl_arch">Linux_AMD_BLIS</parameter>
+            <parameter name="target">xhpl</parameter>
+            <parameter name="hpl_exec">bin/${hpl_arch}/$target</parameter>
+            <parameter name="hpl_lalib" mode="python">{
+                "BLIS/0.8.1":      "$(LAdir)/lib/libblis.a",
+                "BLIS/3.1-amd":    "$(LAdir)/lib/libblis-mt.a",
+              }["${numlib}"]
+            </parameter>
+        </parameterset>
+
+        <!-- compilation -->
+        <step name="compile" tag="!binary">
+            <use>environment</use>
+<!--             <use from="hpl-specs.xml">hplSystemParameter</use> -->
+            <use>hplSystemParameter</use>
+            <use>source</use>
+            <use>compileset</use>
+            <use from="hpl-specs.xml">compilesub</use>
+            <do>${load_modules}; make arch=${hpl_arch}</do>
+        </step>
+
+        <step name="compile" tag="binary">
+            <use>environment</use>
+<!--             <use from="hpl-specs.xml">hplSystemParameter</use> -->
+            <use>hplSystemParameter</use>
+            <use>binary</use>
+        </step>
+
+        <!-- benchmark parameterization -->
+        <parameterset name="hplParameter" init_with="hpl-specs.xml" tag="!gpu">
+          <parameter name="mem" type="int" mode="python">{
+              "juwels":        "96",
+              "juwelstest":    "96",
+              "juwelsbooster": "512",
+              "jurecadc":      "512",
+              "jurecatest":    "512",
+              "jusuf":         "256"
+            }.get("${systemname}","256")
+          </parameter>
+          <parameter name="permem" type="float"  mode="python">{
+              "juwels":        "0.2",
+              "juwelstest":    "0.2",
+              "juwelsbooster": "0.2",
+              "jurecadc":      "0.1",
+              "jurecatest":    "0.1",
+              "jusuf":         "0.2"
+            }.get("${systemname}","0.2")
+          </parameter>
+
+          <parameter name="totalmem" type="float" mode="python">$mem*$permem*$nodes</parameter>
+          
+          <parameter name="hpl_N" type="int" mode="python">int(round(($mem*$permem*1024*1024*1024*$nodes/8.)**0.5/$hpl_NB)*$hpl_NB)</parameter>
+          
+          <parameter name="hpl_NB" type="int">232</parameter>
+
+          <parameter name="calc_P" separator=";"  mode="python">exec("from sympy import divisors, divisor_count") or int($tasks/(divisors($tasks)[int(divisor_count($tasks)/2)]))</parameter>
+          <parameter name="calc_Q" separator=";"  mode="python">exec("from sympy import divisors, divisor_count") or divisors($tasks)[int(divisor_count($tasks)/2)]</parameter>
+          <parameter name="hpl_PQ" separator=";">($calc_P,$calc_Q)</parameter>
+          
+<!--           <parameter name="hpl_PFACT" type="int">0,1,2</parameter> -->
+<!--           <parameter name="hpl_NBMIN" type="int">4</parameter> -->
+<!--           <parameter name="hpl_RFACT" type="int">0,1,2</parameter> -->
+<!--           <parameter name="hpl_BCAST" type="int">0,1,2,3,4,5</parameter> -->
+<!--          <parameter name="hpl_SWAP" type="int">0,1,2</parameter>-->
+          
+          <parameter name="hpl_PFACT" type="int">2</parameter>
+          <parameter name="hpl_NBMIN" type="int">4</parameter>
+          <parameter name="hpl_RFACT" type="int">0</parameter>
+          <parameter name="hpl_BCAST" type="int">1</parameter>
+          <parameter name="hpl_SWAP" type="int">2</parameter>
+        </parameterset>
+
+        <parameterset name="hplParameter" init_with="hpl-specs.xml" tag="gpu">
+          <parameter name="mem" type="int" mode="python">{
+              "juwels":        "64",
+              "juwelstest":    "64",
+              "juwelsbooster": "160",
+              "jurecadc":      "160",
+              "jurecatest":    "160",
+              "jusuf":         "16"
+            }.get("${systemname}","16")
+          </parameter>
+          <parameter name="permem" type="float"  mode="python">{
+              "juwels":        "0.2",
+              "juwelstest":    "0.2",
+              "juwelsbooster": "0.948",
+              "jurecadc":      "0.948",
+              "jurecatest":    "0.948",
+              "jusuf":         "0.948"
+            }.get("${systemname}","0.2")
+          </parameter>
+
+          <parameter name="totalmem" type="float" mode="python">$mem*$permem*$nodes</parameter>
+
+          <parameter name="hpl_N" type="int" mode="python">int(round(($mem*$permem*1024*1024*1024*$nodes/8.)**0.5/$hpl_NB)*$hpl_NB)</parameter>
+
+          <parameter name="hpl_NB" type="int">288</parameter>
+<!--           <parameter name="hpl_NB" type="int">288,304</parameter> -->
+<!--           <parameter name="hpl_NB" type="int" mode="python">", ". join([str(x) for x in range(260,320,4)])</parameter> -->
+
+          <parameter name="hpl_PMAP" type="int">0</parameter>
+
+          <parameter name="calc_P" separator=";"  mode="python">exec("from sympy import divisors, divisor_count") or int($tasks/(divisors($tasks)[int(divisor_count($tasks)/2)]))</parameter>
+          <parameter name="calc_Q" separator=";"  mode="python">exec("from sympy import divisors, divisor_count") or divisors($tasks)[int(divisor_count($tasks)/2)]</parameter>
+          <parameter name="hpl_PQ" separator=";">($calc_P,$calc_Q)</parameter>
+          
+          <parameter name="hpl_threshold" type="float">16.0</parameter>
+          <parameter name="hpl_PFACT" type="int">2</parameter>
+          <parameter name="hpl_NBMIN" type="int">2</parameter>
+          <parameter name="hpl_NDIV" type="int">2</parameter>
+          <parameter name="hpl_RFACT" type="int">0</parameter>
+          <parameter name="hpl_BCAST" type="int">3</parameter>
+          <parameter name="hpl_DEPTH" type="int">1</parameter>
+          <parameter name="hpl_SWAP" type="int">1</parameter>
+          <parameter name="hpl_swapping_threshold" type="int">192</parameter>
+          <parameter name="hpl_L1" type="int">1</parameter>
+          <parameter name="hpl_U" type="int">0</parameter>
+          <parameter name="hpl_equilibration" type="int">1</parameter>
+          <parameter name="hpl_memory_alignment" type="int">8</parameter>
+        </parameterset>
+
+        <!-- system configuration -->
+        <parameterset init_with="platform.xml" name="systemParameter">
+          <parameter name="account" mode="python">{
+                "juwels":        "jscbenchmark",
+                "juwelstest":    "root",
+                "juwelsbooster": "jscbenchmark",
+                "jurecadc":      "jscbenchmark",
+                "jurecatest":    "root",
+                "jusuf":         "jscbenchmark",
+              }.get("${systemname}","root")</parameter>
+            <parameter name="nodes" type="int" tag="!scaling+!nodelist+singlenode">1</parameter>
+            <parameter name="nodes" type="int" tag="!scaling+!nodelist+!singlenode">1,4,16</parameter>
+            <parameter name="nodes" type="int" tag="!scaling+!nodelist+!singlenode+24nodes">24</parameter>
+            <parameter name="iteration" type="int" mode="python" tag="iteration">",".join([str(x) for x in range(3)])</parameter>
+            <parameter name="iteration" type="int" mode="python" tag="iter5">",".join([str(x) for x in range(5)])</parameter>
+            <parameter name="iteration" type="int" mode="python" tag="iter20">",".join([str(x) for x in range(20)])</parameter>
+            <parameter name="nodes" type="int" mode="python" tag="scaling+!nodelist+!gpu">{
+                "juwels":        "1,4,16",
+                "juwelstest":    "1",
+                "juwelsbooster": "1",
+                "jurecadc":      "1,2,4,8,16,32,64,96,112,120,128,256,384,448,480",
+                "jurecatest":    "1,2,4,6",
+                "jusuf":         "1,2,4,8,16,32,64,96,112,120,122",
+              }.get("${systemname}","1")
+            </parameter>
+            <parameter name="nodes" type="int" mode="python" tag="scaling+!nodelist+gpu">{
+                "juwels":        "1",
+                "juwelstest":    "1",
+                "juwelsbooster": "1,2,4,8,16,32,64,128,256,384",
+                "jurecadc":      "1,2,4,8,16,32,64,96,128,169",
+                "jurecatest":    "1,2",
+                "jusuf":         "1",
+              }.get("${systemname}","1")
+            </parameter>
+            <parameter name="nodes" type="int" mode="python" tag="fullsystem+!scaling+!nodelist+!gpu">{
+                "juwels":        "2485",
+                "juwelstest":    "1",
+                "juwelsbooster": "926",
+                "jurecadc":      "566",
+                "jurecatest":    "6",
+                "jusuf":         "122",
+              }.get("${systemname}","1")
+            </parameter>
+            <parameter name="nodes" type="int" mode="python" tag="fullsystem+!scaling+!nodelist+gpu">{
+                "juwels":        "1",
+                "juwelstest":    "1",
+                "juwelsbooster": "926",
+                "jurecadc":      "169",
+                "jurecatest":    "6",
+                "jusuf":         "40",
+              }.get("${systemname}","1")
+            </parameter>
+            <parameter name="nodes" type="int" tag="nodelist+!scaling">1</parameter>
+            <parameter name="taskspernode" type="int" mode="python" tag="!gpu">{
+                "juwels":        "1",
+                "juwelstest":    "12",
+                "juwelsbooster": "1",
+                "jurecadc":      "32",
+                "jurecatest":    "32",
+                "jusuf":         "32"
+              }.get("${systemname}","1")
+            </parameter>
+            <parameter name="threadspertask" type="int" mode="python" tag="!gpu">{
+                "juwels":        "1",
+                "juwelstest":    "4",
+                "juwelsbooster": "1",
+                "jurecadc":      "4",
+                "jurecatest":    "4",
+                "jusuf":         "4"
+              }.get("${systemname}","1")
+            </parameter>
+            <parameter name="taskspernode" type="int" mode="python" tag="gpu">{
+                "juwels":        "4",
+                "juwelstest":    "4",
+                "juwelsbooster": "4",
+                "jurecadc":      "4",
+                "jurecatest":    "4",
+                "jusuf":         "1"
+              }.get("${systemname}","1")
+            </parameter>
+            <parameter name="threadspertask" type="int" mode="python" tag="gpu">{
+                "juwels":        "12",
+                "juwelstest":    "12",
+                "juwelsbooster": "12",
+                "jurecadc":      "12",
+                "jurecatest":    "12",
+                "jusuf":         "12"
+              }.get("${systemname}","1")
+            </parameter>
+            
+            <parameter name="timelimit" tag="!scaling">0:30:00</parameter>
+            <parameter name="timelimit" tag="scaling">6:00:00</parameter>
+            <parameter name="outlogfile">job.out</parameter>
+            <parameter name="errlogfile">job.err</parameter>
+            <parameter name="notification" separator=";">FAIL,REQUEUE,TIME_LIMIT,TIME_LIMIT_50</parameter>
+<!--             <parameter name="notification" separator=";">FAIL</parameter> -->
+            <parameter name="executable" tag="!binary">compile/${hpl_exec}</parameter>
+            <parameter name="executable" tag="binary">compile/xhpl</parameter>
+            <parameter name="queue" mode="python" tag="!gpu">{
+                "juwels":        "batch",
+                "juwelstest":    "batch",
+                "juwelsbooster": "booster",
+                "jurecadc":      "dc-cpu" if $nodes &lt;= 64 else "dc-cpu-large",
+<!--                 "jurecadc":      "dc-cpu-large", -->
+                "jurecatest":    "batch",
+                "jusuf":         "batch"
+              }.get("${systemname}","batch")
+            </parameter>
+            <parameter name="queue" mode="python" tag="gpu">{
+                "juwels":        "gpus",
+                "juwelstest":    "gpus",
+                "juwelsbooster":      "booster" if $nodes &lt;= 384 else "largebooster",
+                "jurecadc":      "dc-gpu" if $nodes &lt;= 16 else "dc-gpu-large",
+<!--                 "jurecadc":      "dc-gpu-large", -->
+                "jurecatest":    "gpus",
+                "jusuf":         "gpus"
+              }.get("${systemname}","batch")
+            </parameter>
+            <parameter name="queue" mode="python" tag="maint">{
+                "jurecadc":      "dc-maint",
+              }.get("${systemname}","batch")
+            </parameter>
+            <parameter name="gres" tag="gpu">gpu:4</parameter>
+            <parameter name="measurement">${load_modules}; time -p</parameter>
+
+            <!-- all nodes which are currently idle -->
+<!--             <parameter name="node" mode="shell" tag="nodelist">nodeset -e -S "," $(scontrol show ReservationName=maintenance_20220628 -o | grep -oP "Nodes=\K\S+") -X $(sinfo -p ${queue} -ht DRAIN -o "%N")</parameter> -->
+            <parameter name="node" mode="shell" tag="nodelist+maint">nodeset -e -S "," $(sinfo -p ${queue} -ho "%N" ) -X $(sinfo -p ${queue} -ht DRAIN -o "%N")</parameter>
+
+            <!-- all nodes in partition, but not drained or reserverd -->
+            <parameter name="node" mode="shell" tag="nodelist+!maint">nodeset -e -S "," $(sinfo -p ${queue} -ho "%N") -X $(sinfo -p ${queue} -ht DRAIN -o "%N") -X $(sinfo -p ${queue} -ht res -o "%N")</parameter>
+
+            <!-- all nodes which are currently idle, but not drained or reserverd -->
+<!--             <parameter name="node" mode="shell" tag="nodelist+!maint">nodeset -e -S "," $(sinfo -p ${queue} -t IDLE -ho "%N") -X $(sinfo -p ${queue} -ht DRAIN -o "%N") -X $(sinfo -p ${queue} -ht res -o "%N") -X $(sinfo -p ${queue} -ht DOWN -o "%N")</parameter> -->
+
+            <!-- all nodes in reservation, but not drained or down -->
+            <parameter name="node" mode="shell" tag="nodelist+!maint+reservation">nodeset -e -S "," $(scontrol show res=slow_performance | grep -oP "Nodes=\K\S+") -x $(sinfo -p dc-cpu-large -ht DRAIN -o "%N") -x $(sinfo -p dc-cpu-large -ht DOWN -o "%N")</parameter>
+
+            <!-- all nodes except nodes which are drained or reserverd -->
+<!--       <parameter name="node" mode="shell" tag="nodelist">nodeset -e -S "," $(sinfo -p ${queue} -ho "%N") -X $(sinfo -p ${queue} -ht DRAIN -o "%N") -X $(sinfo -p ${queue} -ht res -o "%N") -X $(sinfo -p ${queue} -ht DOWN -o "%N")</parameter> -->
+
+            <!-- run on specific nodes (uncomment to use) -->
+<!--             <parameter name="node">jrc0038,jrc0511,jrc0520</parameter> -->
+
+            <parameter name="slurm_nodelist" tag="!nodelist"></parameter>
+            <parameter name="slurm_nodelist" tag="nodelist">#SBATCH --nodelist=${node}</parameter>
+
+            <!-- exclude nodes that have problems -->
+            <parameter name="exclude" mode="python" separator="+=+">{
+                "juwels":        "",
+                "juwelstest":    "",
+                "juwelsbooster": "",
+<!--                 "jurecadc":      "jrc0038,jrc0511,jrc0520,jrc0225,jrc0245,jrc0248,jrc0256,jrc0264,jrc0285,jrc0321,jrc0322,jrc0323,jrc0325,jrc0326,jrc0327,jrc0328,jrc0331,jrc0341,jrc0342,jrc0414,jrc0415", -->
+                "jurecadc":      "jrc0038,jrc0511,jrc0520,jrc0327,jrc0328,jrc0256,jrc0326,jrc0342",
+                "jurecatest":    "",
+                "jusuf":         ""
+              }.get("${systemname}","")
+            </parameter>
+            <parameter name="slurm_exclude" tag="nodelist"></parameter>
+            <parameter name="slurm_exclude" separator="+=+" tag="!nodelist">#SBATCH --exclude=${exclude}</parameter>
+
+            <parameter name="slurm_additional" separator="+=+" tag="!nodelist">${slurm_exclude}
+${slurm_nodelist}
+            </parameter>
+            <parameter name="slurm_additional" separator="+=+" tag="nodelist">${slurm_nodelist}</parameter>
+
+            <parameter name="reservation" separator="+=+" tag="!reservation"></parameter>
+            <parameter name="reservation" separator="+=+" tag="reservation">slow_performance</parameter>
+
+            <parameter name="slurm_reservation" separator="+=+" tag="!maint"></parameter>
+            <parameter name="slurm_reservation" separator="+=+" tag="maint">#SBATCH --reservation=maintenance_20220628_dc</parameter>
+            <parameter name="slurm_reservation" separator="+=+" tag="reservation">#SBATCH --reservation=${reservation}</parameter>
+
+            <parameter name="additional_job_config" mode="python"  separator="+=+" tag="!gpu">"""${slurm_additional}
+${slurm_reservation}
+
+export OMP_PROC_BIND=TRUE
+export OMP_PLACES=cores
+
+<!-- export OMP_NUM_THREADS=$threadspertask -->
+
+export PSP_ONDEMAND=1
+export PSP_OPENIB_SENDQ_SIZE=3
+export PSP_OPENIB_SENDQ_SIZE=3
+export PSP_UCP=1
+export UCX_TLS=ud_x,self,sm
+
+export SRUN_CPUS_PER_TASK=$${SLURM_CPUS_PER_TASK}
+
+#DGEMM parallelization is performed at the 2nd innermost loop (IC)
+export BLIS_IR_NT=1
+export BLIS_JR_NT=1
+export BLIS_IC_NT=$threadspertask
+export BLIS_JC_NT=1"""
+            </parameter>
+
+            <parameter name="additional_job_config" mode="python"  separator="+=+" tag="gpu">"""${slurm_additional}
+${slurm_reservation}
+
+# Global settings
+export MONITOR_GPU=1
+export GPU_TEMP_WARNING=78
+export GPU_CLOCK_WARNING=1295
+export GPU_POWER_WARNING=425
+export GPU_PCIE_GEN_WARNING=3
+export GPU_PCIE_WIDTH_WARNING=2
+export TRSM_CUTOFF=9000000
+export TEST_LOOPS=1
+export MAX_H2D_MS=200
+export MAX_D2H_MS=200
+export OMP_PROC_BIND=TRUE
+export OMP_PLACES=sockets
+
+# UCX settings
+export UCX_TLS=cma,rc,mm,cuda_copy,cuda_ipc,gdr_copy
+export UCX_RNDV_THRESH=16384
+export UCX_RNDV_SCHEME=get_zcopy
+export UCX_IB_GPU_DIRECT_RDMA=yes
+
+# HPL specific
+export CUDA_DEVICE_MAX_CONNECTIONS=16 #HPL
+export CUDA_COPY_SPLIT_THRESHOLD_MB=1
+export GPU_DGEMM_SPLIT=1.00 #HPL
+export MKL_DEBUG_CPU_TYPE=5 #HPL
+export TEST_SYSTEM_PARAMS=1 #HPL-AI=0
+export ICHUNK_SIZE=768
+export CHUNK_SIZE=3456
+
+export SRUN_CPUS_PER_TASK=$${SLURM_CPUS_PER_TASK}
+export OMP_NUM_THREADS=$${SLURM_CPUS_PER_TASK}
+export MKL_NUM_THREADS=$${SLURM_CPUS_PER_TASK}
+export KMP_AFFINITY=scatter
+export OMP_WAIT_POLICY=active
+export TEST_LOOPS=1
+
+# sudo nvidia-smi -rac  > /dev/null
+# sudo nvidia-smi -rgc  > /dev/null
+# sudo nvidia-smi -lgc 1320,1320
+"""
+            </parameter>
+        </parameterset>
+
+        <parameterset name="executeset" init_with="platform.xml">
+            <parameter name="cpufreq"></parameter>
+<!--             <parameter name="cpufreq" tag="cpufreq">1.5,2.0,2.25</parameter> -->
+            <parameter name="cpufreq" tag="cpufreq">1.5,1.75,2.0,2.05,2.1,2.15,2.2,2.25</parameter>
+            <parameter name="args_starter" tag="cpufreq+!gpufreq">--cpufreq=${cpufreq}</parameter>
+            <parameter name="gpufreq"></parameter> -->
+<!--             <parameter name="gpufreq" tag="gpufreq">1095,1080,1065,1050,1035,1020,1005,990,975,945,930,915,900,885,870,855</parameter> -->
+            <parameter name="gpufreq" tag="gpufreq">1350</parameter>
+            <parameter name="args_starter" tag="gpufreq+!cpufreq">--gpufreq=${gpufreq}</parameter>
+            <parameter name="args_starter" tag="cpufreq+gpufreq">--cpufreq=${cpufreq} --gpufreq=${gpufreq}</parameter>
+        </parameterset>
+
+        <!-- execution and job submission -->
+        <step name="execution" depend="compile" iterations="1">
+            <use>environment</use>
+            <use from="hpl-specs.xml">hplInputFile</use>
+            <use from="hpl-specs.xml">hplInputFileSub</use>
+            <use>hplParameter</use>
+            <use>systemParameter</use>
+            <use>executeset</use>
+            <use from="platform.xml">executesub</use>
+            <use from="platform.xml">jobfiles</use>
+            <do done_file="$done_file" tag="!hold">$submit $submit_script</do>
+            <do done_file="$done_file" tag="hold">$submit --hold $submit_script</do>
+        </step>
+
+        <!-- analyse -->
+        <analyzer name="analyze">
+            <use from="hpl-specs.xml">pattern</use>
+            <use from="hpl-specs.xml">jobnumber</use>
+            <analyse step="execution">
+                <file>job.out</file>
+                <file>stdout</file>
+            </analyse>
+        </analyzer>
+
+        <!-- result creation -->
+        <result>
+            <use>analyze</use>
+            <table name="result" style="pretty" sort="nodes, taskspernode, pat_N, pat_perf_all">
+                <column>nodes</column>
+                <column>taskspernode</column>
+                <column>threadspertask</column>
+                <column>hpl_N</column>
+                <column>pat_N</column>
+                <column>pat_P</column>
+                <column>pat_Q</column>
+                <column>pat_NB</column>
+                <column format=".3e">pat_perf_all</column>
+                <column format=".3e">pat_perf_avg_node</column>
+                <column>pat_time</column>
+            </table>
+
+            <table name="result_long" style="pretty" sort="nodes, taskspernode, pat_N, pat_perf_all">
+                <column>nodes</column>
+                <column>taskspernode</column>
+                <column>threadspertask</column>
+                <column>pat_N</column>
+                <column>pat_P</column>
+                <column>pat_Q</column>
+                <column>pat_NB</column>
+                <column>cpufreq</column>
+                <column>gpufreq</column>
+                <column format=".3e">pat_perf_all</column>
+                <column format=".3e">pat_perf_avg_node</column>
+                <column>pat_time_avg</column>
+                <column>pat_time_std</column>
+                <column>pat_time_min</column>
+                <column>pat_time_max</column>
+            </table>
+            
+            <!--<table name="result_nodes" style="pretty" sort="nodes, taskspernode, pat_N, pat_P, pat_Q, pat_NB, hpl_PFACT, hpl_NBMIN, hpl_RFACT, hpl_BCAST, hpl_SWAP, pat pat_perf_all">-->
+            <table name="result_nodes" style="pretty" sort="pat_perf_all, nodes, taskspernode, pat_N, pat_P, pat_Q, pat_NB, hpl_PFACT, hpl_NBMIN, hpl_RFACT, hpl_BCAST, hpl_SWAP">
+<!--                 <column>node</column> -->
+<!--                 <column>confenv</column> -->
+                <column>nodelist</column>
+                <column>nodes</column>
+                <column>taskspernode</column>
+                <column>threadspertask</column>
+                <column>pat_N</column>
+                <column>pat_P</column>
+                <column>pat_Q</column>
+                <column>pat_NB</column>
+                <column>hpl_PFACT</column>
+                <column>hpl_NBMIN</column>
+                <column>hpl_RFACT</column>
+                <column>hpl_BCAST</column>
+                <column>hpl_SWAP</column>
+                <column format=".3e">pat_perf_all</column>
+                <column format=".3e">pat_perf_avg_node</column>
+            </table>
+
+            <table name="result_nodelist" style="pretty" sort="nodelist, jobid, pat_perf_all, nodes, taskspernode, pat_N, pat_P, pat_Q, pat_NB, hpl_PFACT, hpl_NBMIN, hpl_RFACT, hpl_BCAST, hpl_SWAP">
+                <column>nodelist</column>
+                <column>jobid</column>
+                <column>nodes</column>
+                <column>taskspernode</column>
+                <column>threadspertask</column>
+                <column>pat_N</column>
+                <column>pat_P</column>
+                <column>pat_Q</column>
+                <column>pat_NB</column>
+                <column format=".3e">pat_perf_all</column>
+            </table>
+            
+            <table name="jobinfo" style="pretty" tag="!check" sort="nodes, taskspernode, pat_N, pat_perf_all">
+              <column>nodes</column>
+              <column>taskspernode</column>
+              <column>threadspertask</column>
+              <column>gpus</column>
+              <column>queue</column>
+              <column>jobid</column>
+              <column tag="nodelist">node</column>
+              <column>nodelist</column>
+              <column>status</column>
+              <column>exit_code</column>
+              <column>MaxRSS</column>
+              <column format=".2f">totalmem</column>
+              <column>mempernode</column>
+            </table>
+
+            <table name="result-csv" style="csv" sort="nodes, taskspernode, pat_N, pat_perf_all">
+                <column>nodes</column>
+                <column>taskspernode</column>
+                <column>threadspertask</column>
+                <column>gpus</column>
+                <column>queue</column>
+                <column>jobid</column>
+                <column>nodelist_string</column>
+                <column>status</column>
+                <column>exit_code</column>
+                <column>MaxRSS</column>
+                <column>totalmem</column>
+                <column>mempernode</column>
+                <column tag="cpufreq">cpufreq</column>
+                <column tag="gpufreq">gpufreq</column>
+                <column>pat_N</column>
+                <column>pat_P</column>
+                <column>pat_Q</column>
+                <column>pat_NB</column>
+                <column>hpl_PFACT</column>
+                <column>hpl_NBMIN</column>
+                <column>hpl_RFACT</column>
+                <column>hpl_BCAST</column>
+                <column>hpl_SWAP</column>
+                <column>pat_perf_all</column>
+                <column>pat_perf_avg_node</column>
+                <column>pat_time</column>
+            </table>
+        </result>
+    </benchmark>
+</jube>
